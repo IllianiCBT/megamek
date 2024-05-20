@@ -68,7 +68,7 @@ public class Crew implements Serializable {
     private boolean ejected;
 
     // StratOps fatigue points
-    private final int[] fatiguePoints;
+    private final int[] fatigue;
     // also need to track turns for fatigue by pilot because some may have later deployment
     private int fatigueTurnCount;
 
@@ -240,7 +240,7 @@ public class Crew implements Serializable {
         missing = new boolean[slots];
         koThisRound = new boolean[slots];
         toughness = new int[slots];
-        fatiguePoints = new int[slots];
+        fatigue = new int[slots];
 
         options.initialize();
 
@@ -1031,7 +1031,7 @@ public class Crew implements Serializable {
         int fatigueModifier = 0;
 
         for (int i = 0; i < getSlotCount(); i++) {
-            fatigueModifier = MathUtility.clamp((fatiguePoints[i] - 1) / 4, 0, 4);
+            fatigueModifier = MathUtility.clamp((fatigue[i] - 1) / 4, 0, 4);
         }
 
         return -(fatigueModifier / getSlotCount());
@@ -1104,11 +1104,11 @@ public class Crew implements Serializable {
     }
 
     public int getFatigue(int pos) {
-        return fatiguePoints[pos];
+        return fatigue[pos];
     }
 
     public void setFatigue(int i, int pos) {
-        fatiguePoints[pos] = i;
+        fatigue[pos] = i;
     }
 
     public void incrementFatigueCount() {
