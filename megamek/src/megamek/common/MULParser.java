@@ -131,6 +131,7 @@ public class MULParser {
     public static final String ATTR_PILOTING = "piloting";
     public static final String ATTR_ARTILLERY = "artillery";
     public static final String ATTR_TOUGH = "toughness";
+    public static final String ATTR_FATIGUE = "fatigue";
     public static final String ATTR_INITB = "initB";
     public static final String ATTR_COMMANDB = "commandB";
     public static final String ATTR_HITS = "hits";
@@ -1319,6 +1320,16 @@ public class MULParser {
                 }
             }
 
+            // fatigue
+            int fatigueVal = 0;
+
+            if ((options != null) && options.booleanOption(OptionsConstants.ADVANCED_TACOPS_FATIGUE)
+                    && (attributes.containsKey(ATTR_FATIGUE)) && !attributes.get(ATTR_FATIGUE).isBlank()) {
+                try {
+                    fatigueVal = Integer.parseInt(attributes.get(ATTR_FATIGUE));
+                } catch (NumberFormatException ignored) {}
+            }
+
             int artVal = gunVal;
             if ((options != null) && options.booleanOption(OptionsConstants.RPG_ARTILLERY_SKILL)
                     && (attributes.containsKey(ATTR_ARTILLERY)) && !attributes.get(ATTR_ARTILLERY).isBlank()) {
@@ -1341,6 +1352,7 @@ public class MULParser {
             crew.setArtillery(artVal, slot);
             crew.setPiloting(pilotVal, slot);
             crew.setToughness(toughVal, slot);
+            crew.setFatigue(fatigueVal, slot);
 
             if ((attributes.containsKey(ATTR_NAME)) && !attributes.get(ATTR_NAME).isBlank()) {
                 crew.setName(attributes.get(ATTR_NAME), slot);

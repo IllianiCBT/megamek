@@ -15,7 +15,6 @@
 */
 package megamek.common;
 
-import megamek.client.generator.RandomGenderGenerator;
 import megamek.client.ui.swing.tooltip.PilotToolTip;
 import megamek.codeUtilities.MathUtility;
 import megamek.common.enums.Gender;
@@ -69,7 +68,7 @@ public class Crew implements Serializable {
     private boolean ejected;
 
     // StratOps fatigue points
-    private int fatiguePoints;
+    private final int[] fatiguePoints;
     // also need to track turns for fatigue by pilot because some may have later deployment
     private int fatigueTurnCount;
 
@@ -240,8 +239,8 @@ public class Crew implements Serializable {
         dead = new boolean[slots];
         missing = new boolean[slots];
         koThisRound = new boolean[slots];
-        fatiguePoints = 0;
         toughness = new int[slots];
+        fatiguePoints = new int[slots];
 
         options.initialize();
 
@@ -367,7 +366,7 @@ public class Crew implements Serializable {
     public int getSize() {
         return size;
     }
-    
+
     /**
      * The currentsize of this crew.
      *
@@ -514,7 +513,7 @@ public class Crew implements Serializable {
     public int getHits() {
         return Arrays.stream(hits).min().orElse(0);
     }
-    
+
     /**
      * Uses the table on TO p206 to calculate the number of crew hits based on percentage
      * of total casualties. Used for ejection, boarding actions and such
@@ -563,7 +562,7 @@ public class Crew implements Serializable {
     public void setSize(int newSize) {
         size = newSize;
     }
-    
+
     /**
      * Accessor method to set the current crew size.
      *
@@ -1022,9 +1021,20 @@ public class Crew implements Serializable {
         return fatigueTurnCount >= getGunneryFatigueTurn();
     }
 
-    /** Returns the modifier for the TO:AR p.166 fatigue turn thresholds from CamOps p.219 fatigue points. */
+    /**
+     * Returns the modifier for the TO:AR p.166 fatigue turn thresholds from CamOps p.219 fatigue points.
+     * For multi-crewed Units, we average the fatigue modifier
+     *
+     * @return The fatigue modifier for the unit.
+     */
     private int CamOpsFatigueTurnModifier() {
-        return -MathUtility.clamp((fatiguePoints - 1) / 4, 0, 4);
+        int fatigueModifier = 0;
+
+        for (int i = 0; i < getSlotCount(); i++) {
+            fatigueModifier = MathUtility.clamp((fatiguePoints[i] - 1) / 4, 0, 4);
+        }
+
+        return -(fatigueModifier / getSlotCount());
     }
 
     /** Returns the rating used for TO:AR p.166 fatigue. */
@@ -1093,12 +1103,12 @@ public class Crew implements Serializable {
         toughness[pos] = t;
     }
 
-    public int getFatigue() {
-        return fatiguePoints;
+    public int getFatigue(int pos) {
+        return fatiguePoints[pos];
     }
 
-    public void setFatigue(int i) {
-        fatiguePoints = i;
+    public void setFatigue(int i, int pos) {
+        fatiguePoints[pos] = i;
     }
 
     public void incrementFatigueCount() {

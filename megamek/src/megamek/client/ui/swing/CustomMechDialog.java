@@ -61,7 +61,6 @@ public class CustomMechDialog extends AbstractButtonDialog implements ActionList
 
     private JTabbedPane tabAll;
 
-    private final JTextField fldFatigue = new JTextField(3);
     private final JTextField fldInit = new JTextField(3);
     private final JTextField fldCommandInit = new JTextField(3);
     private final JCheckBox chCommander = new JCheckBox();
@@ -630,7 +629,6 @@ public class CustomMechDialog extends AbstractButtonDialog implements ActionList
         }
 
         // get values
-        int fatigue;
         int init;
         int command;
         int velocity = 0;
@@ -640,7 +638,6 @@ public class CustomMechDialog extends AbstractButtonDialog implements ActionList
         int offBoardDistance;
         try {
             init = Integer.parseInt(fldInit.getText());
-            fatigue = Integer.parseInt(fldFatigue.getText());
             command = Integer.parseInt(fldCommandInit.getText());
             if (isAero || isShip) {
                 velocity = Integer.parseInt(fldStartVelocity.getText());
@@ -710,6 +707,7 @@ public class CustomMechDialog extends AbstractButtonDialog implements ActionList
                 int gunneryAeroB;
                 int pilotingAero;
                 int tough;
+                int fatigue;
                 int backup = panCrewMember[i].getBackup();
                 try {
                     gunnery = panCrewMember[i].getGunnery();
@@ -724,6 +722,7 @@ public class CustomMechDialog extends AbstractButtonDialog implements ActionList
                     pilotingAero = panCrewMember[i].getPilotingAero();
                     artillery = panCrewMember[i].getArtillery();
                     tough = panCrewMember[i].getToughness();
+                    fatigue = panCrewMember[i].getFatigue();
                 } catch (NumberFormatException e) {
                     msg = Messages.getString("CustomMechDialog.EnterValidSkills");
                     title = Messages.getString("CustomMechDialog.NumberFormatError");
@@ -789,6 +788,7 @@ public class CustomMechDialog extends AbstractButtonDialog implements ActionList
                 }
                 entity.getCrew().setMissing(missing, i);
                 entity.getCrew().setToughness(tough, i);
+                entity.getCrew().setFatigue(fatigue, i);
                 entity.getCrew().setName(name, i);
                 entity.getCrew().setNickname(nick, i);
                 entity.getCrew().setHits(Integer.parseInt(hits), i);
@@ -813,7 +813,6 @@ public class CustomMechDialog extends AbstractButtonDialog implements ActionList
                     client.sendUpdateEntity(other);
                 }
             }
-            entity.getCrew().setFatigue(fatigue);
             entity.getCrew().setInitBonus(init);
             entity.getCrew().setCommandBonus(command);
 
@@ -1145,13 +1144,6 @@ public class CustomMechDialog extends AbstractButtonDialog implements ActionList
         }
 
         // **CREW TAB**//
-        if (gameOptions().booleanOption(OptionsConstants.ADVANCED_TACOPS_FATIGUE)) {
-            panCrew.add(new JLabel(Messages.getString("CustomMechDialog.labFatigue"), SwingConstants.RIGHT), GBC.std());
-            panCrew.add(fldFatigue, GBC.eop());
-            fldFatigue.setToolTipText(Messages.getString("CustomMechDialog.labFatigueToolTip"));
-        }
-        fldFatigue.setText(Integer.toString(entity.getCrew().getFatigue()));
-
         if (gameOptions().booleanOption(OptionsConstants.RPG_INDIVIDUAL_INITIATIVE)) {
             panCrew.add(new JLabel(Messages.getString("CustomMechDialog.labInit"), SwingConstants.RIGHT), GBC.std());
             panCrew.add(fldInit, GBC.eop());
@@ -1310,7 +1302,6 @@ public class CustomMechDialog extends AbstractButtonDialog implements ActionList
         }
 
         if (!editable) {
-            fldFatigue.setEnabled(false);
             fldInit.setEnabled(false);
             fldCommandInit.setEnabled(false);
             chCommander.setEnabled(false);

@@ -52,7 +52,7 @@ public class CrewTest {
         inf.getCrew().setGunnery(1);
         assertFalse(inf.getCrew().isPilotingFatigued());
 
-        inf.getCrew().setFatigue(15);
+        inf.getCrew().setFatigue(15, 0);
         assertTrue(inf.getCrew().isPilotingFatigued());
 
         crew = getInfantryCrewWithCombatTurns(16);
@@ -61,10 +61,10 @@ public class CrewTest {
         inf.getCrew().setPiloting(8);
         assertFalse(inf.getCrew().isPilotingFatigued());
 
-        inf.getCrew().setFatigue(4);
+        inf.getCrew().setFatigue(4, 0);
         assertFalse(inf.getCrew().isPilotingFatigued());
 
-        inf.getCrew().setFatigue(5);
+        inf.getCrew().setFatigue(5, 0);
         assertTrue(inf.getCrew().isPilotingFatigued());
     }
 
@@ -86,7 +86,7 @@ public class CrewTest {
         inf.getCrew().setGunnery(1);
         assertTrue(inf.getCrew().isPilotingFatigued());
 
-        inf.getCrew().setFatigue(15);
+        inf.getCrew().setFatigue(15, 0);
         assertTrue(inf.getCrew().isPilotingFatigued());
 
         crew = getMekCrewWithCombatTurns(16);
@@ -95,10 +95,10 @@ public class CrewTest {
         inf.getCrew().setPiloting(8);
         assertTrue(inf.getCrew().isPilotingFatigued());
 
-        inf.getCrew().setFatigue(4);
+        inf.getCrew().setFatigue(4, 0);
         assertTrue(inf.getCrew().isPilotingFatigued());
 
-        inf.getCrew().setFatigue(5);
+        inf.getCrew().setFatigue(5, 0);
         assertTrue(inf.getCrew().isPilotingFatigued());
     }
 
