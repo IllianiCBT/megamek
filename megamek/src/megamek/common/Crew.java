@@ -1107,8 +1107,8 @@ public class Crew implements Serializable {
         return fatigue[pos];
     }
 
-    public void setCrewFatigue(int fatigue, int pos) {
-        this.fatigue[pos] = fatigue;
+    public void setCrewFatigue(int fatigue, int position) {
+        this.fatigue[position] = fatigue;
     }
 
     public void incrementFatigueCount() {

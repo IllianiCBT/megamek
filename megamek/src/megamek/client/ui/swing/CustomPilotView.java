@@ -437,7 +437,7 @@ public class CustomPilotView extends JPanel {
         return Integer.parseInt(fldTough.getText());
     }
 
-    public int getFatigue() {
+    public int getCrewFatigue() {
         return Integer.parseInt(fldFatigue.getText());
     }
 

@@ -724,7 +724,7 @@ public class CustomMechDialog extends AbstractButtonDialog implements ActionList
                     pilotingAero = panCrewMember[i].getPilotingAero();
                     artillery = panCrewMember[i].getArtillery();
                     tough = panCrewMember[i].getToughness();
-                    fatigue = panCrewMember[i].getFatigue();
+                    fatigue = panCrewMember[i].getCrewFatigue();
                 } catch (NumberFormatException e) {
                     msg = Messages.getString("CustomMechDialog.EnterValidSkills");
                     title = Messages.getString("CustomMechDialog.NumberFormatError");
