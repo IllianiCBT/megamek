@@ -1103,12 +1103,12 @@ public class Crew implements Serializable {
         toughness[pos] = t;
     }
 
-    public int getFatigue(int pos) {
+    public int getCrewFatigue(int pos) {
         return fatigue[pos];
     }
 
-    public void setFatigue(int i, int pos) {
-        fatigue[pos] = i;
+    public void setCrewFatigue(int fatigue, int pos) {
+        this.fatigue[pos] = fatigue;
     }
 
     public void incrementFatigueCount() {

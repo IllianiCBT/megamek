@@ -87,7 +87,7 @@ public class LAMPilot extends Crew {
         pilot.setInitBonus(crew.getInitBonus());
         pilot.setCommandBonus(crew.getCommandBonus());
         pilot.setToughness(crew.getToughness(0), 0);
-        pilot.setFatigue(crew.getFatigue(0), 0);
+        pilot.setCrewFatigue(crew.getCrewFatigue(0), 0);
         pilot.setOptions(crew.getOptions());
 
         pilot.setExternalIdAsString(crew.getExternalIdAsString(0), 0);

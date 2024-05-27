@@ -242,7 +242,7 @@ public class CustomPilotView extends JPanel {
             add(label, GBC.std());
             add(fldFatigue, GBC.eop());
         }
-        fldFatigue.setText(Integer.toString(entity.getCrew().getFatigue(slot)));
+        fldFatigue.setText(Integer.toString(entity.getCrew().getCrewFatigue(slot)));
 
         if (entity.getCrew().getSlotCount() > 2) {
             for (int i = 0; i < entity.getCrew().getSlotCount(); i++) {

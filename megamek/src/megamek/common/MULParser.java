@@ -1352,7 +1352,7 @@ public class MULParser {
             crew.setArtillery(artVal, slot);
             crew.setPiloting(pilotVal, slot);
             crew.setToughness(toughVal, slot);
-            crew.setFatigue(fatigueVal, slot);
+            crew.setCrewFatigue(fatigueVal, slot);
 
             if ((attributes.containsKey(ATTR_NAME)) && !attributes.get(ATTR_NAME).isBlank()) {
                 crew.setName(attributes.get(ATTR_NAME), slot);

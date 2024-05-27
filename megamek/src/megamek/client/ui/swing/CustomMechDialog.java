@@ -22,16 +22,18 @@ import megamek.common.*;
 import megamek.common.enums.Gender;
 import megamek.common.equipment.WeaponMounted;
 import megamek.common.options.*;
-import megamek.common.verifier.*;
+import megamek.common.verifier.TestEntity;
 import megamek.common.weapons.bayweapons.ArtilleryBayWeapon;
 import megamek.common.weapons.bayweapons.CapitalMissileBayWeapon;
 
 import javax.swing.*;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
-
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.List;
 import java.util.*;
 
@@ -788,7 +790,7 @@ public class CustomMechDialog extends AbstractButtonDialog implements ActionList
                 }
                 entity.getCrew().setMissing(missing, i);
                 entity.getCrew().setToughness(tough, i);
-                entity.getCrew().setFatigue(fatigue, i);
+                entity.getCrew().setCrewFatigue(fatigue, i);
                 entity.getCrew().setName(name, i);
                 entity.getCrew().setNickname(nick, i);
                 entity.getCrew().setHits(Integer.parseInt(hits), i);

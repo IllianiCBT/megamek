@@ -1161,9 +1161,9 @@ public class EntityListFile {
             output.write(String.valueOf(crew.getToughness(pos)));
         }
 
-        if (crew.getFatigue(0) != 0) {
+        if (crew.getCrewFatigue(0) != 0) {
             output.write("\" " + MULParser.ATTR_FATIGUE + "=\"");
-            output.write(String.valueOf(crew.getFatigue(pos)));
+            output.write(String.valueOf(crew.getCrewFatigue(pos)));
         }
 
         if (crew.isDead(pos) || (crew.getHits(pos) > 5)) {
