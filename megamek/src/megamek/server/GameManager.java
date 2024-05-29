@@ -3021,23 +3021,23 @@ public class GameManager extends AbstractGameManager {
         boolean infMoveEven = (game.getOptions().booleanOption(OptionsConstants.INIT_INF_MOVE_EVEN)
                 && (game.getPhase().isInitiative() || game.getPhase().isMovement()))
                 || (game.getOptions().booleanOption(OptionsConstants.INIT_INF_DEPLOY_EVEN)
-                        && game.getPhase().isDeployment());
+                && game.getPhase().isDeployment());
         boolean infMoveMulti = game.getOptions().booleanOption(OptionsConstants.INIT_INF_MOVE_MULTI)
                 && (game.getPhase().isInitiative() || game.getPhase().isMovement()
-                        || game.getPhase().isDeployment());
+                || game.getPhase().isDeployment());
         boolean protosMoveEven = (game.getOptions().booleanOption(OptionsConstants.INIT_PROTOS_MOVE_EVEN)
                 && (game.getPhase().isInitiative() || game.getPhase().isMovement()
-                        || game.getPhase().isDeployment()))
+                || game.getPhase().isDeployment()))
                 || (game.getOptions().booleanOption(OptionsConstants.INIT_PROTOS_MOVE_EVEN)
-                        && game.getPhase().isDeployment());
+                && game.getPhase().isDeployment());
         boolean protosMoveMulti = game.getOptions().booleanOption(OptionsConstants.INIT_PROTOS_MOVE_MULTI);
         boolean protosMoveByPoint = !protosMoveMulti;
         boolean tankMoveByLance = game.getOptions().booleanOption(OptionsConstants.ADVGRNDMOV_VEHICLE_LANCE_MOVEMENT)
                 && (game.getPhase().isInitiative() || game.getPhase().isMovement()
-                        || game.getPhase().isDeployment());
+                || game.getPhase().isDeployment());
         boolean mekMoveByLance = game.getOptions().booleanOption(OptionsConstants.ADVGRNDMOV_MEK_LANCE_MOVEMENT)
                 && (game.getPhase().isInitiative() || game.getPhase().isMovement()
-                        || game.getPhase().isDeployment());
+                || game.getPhase().isDeployment());
 
         int evenMask = 0;
         if (infMoveEven) {
@@ -14619,7 +14619,7 @@ public class GameManager extends AbstractGameManager {
             if ((hex.terrainLevel(Terrains.SNOW) > 1) && (meltCheck == 12)) {
                 melted = true;
             } else if ((hex.containsTerrain(Terrains.ICE)
-            || hex.containsTerrain(Terrains.BLACK_ICE)) && (meltCheck > 9)) {
+                    || hex.containsTerrain(Terrains.BLACK_ICE)) && (meltCheck > 9)) {
                 melted = true;
             } else if (hex.containsTerrain(Terrains.SNOW) && (meltCheck > 7)) {
                 melted = true;
