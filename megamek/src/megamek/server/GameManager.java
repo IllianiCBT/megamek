@@ -24885,7 +24885,7 @@ public class GameManager extends AbstractGameManager {
      * @param damageCaused     the amount of damage causing this critical.
      * @param isCapital        whether it was capital scale damage that caused critical
      */
-    public Vector<Report> applyAeroCritical(Aero aero, int loc, CriticalSlot cs, int damageCaused, boolean isCapital) {
+    private Vector<Report> applyAeroCritical(Aero aero, int loc, CriticalSlot cs, int damageCaused, boolean isCapital) {
         Vector<Report> reports = new Vector<>();
         Report r;
         Jumpship js = null;
