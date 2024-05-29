@@ -23,7 +23,9 @@ import megamek.common.Building.DemolitionCharge;
 import megamek.common.actions.*;
 import megamek.common.annotations.Nullable;
 import megamek.common.containers.PlayerIDandList;
-import megamek.common.enums.*;
+import megamek.common.enums.BasementType;
+import megamek.common.enums.GamePhase;
+import megamek.common.enums.WeaponSortOrder;
 import megamek.common.equipment.*;
 import megamek.common.event.GameVictoryEvent;
 import megamek.common.force.Force;
@@ -38,12 +40,10 @@ import megamek.common.planetaryconditions.Atmosphere;
 import megamek.common.planetaryconditions.PlanetaryConditions;
 import megamek.common.planetaryconditions.Wind;
 import megamek.common.preference.PreferenceManager;
-import megamek.common.Report;
-import megamek.common.ReportMessages;
 import megamek.common.service.AutosaveService;
 import megamek.common.util.*;
 import megamek.common.util.fileUtils.MegaMekFile;
-import megamek.common.verifier.*;
+import megamek.common.verifier.TestEntity;
 import megamek.common.weapons.*;
 import megamek.common.weapons.infantry.InfantryWeapon;
 import megamek.server.commands.*;
@@ -54,8 +54,8 @@ import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
@@ -24885,7 +24885,7 @@ public class GameManager extends AbstractGameManager {
      * @param damageCaused     the amount of damage causing this critical.
      * @param isCapital        whether it was capital scale damage that caused critical
      */
-    private Vector<Report> applyAeroCritical(Aero aero, int loc, CriticalSlot cs, int damageCaused, boolean isCapital) {
+    public Vector<Report> applyAeroCritical(Aero aero, int loc, CriticalSlot cs, int damageCaused, boolean isCapital) {
         Vector<Report> reports = new Vector<>();
         Report r;
         Jumpship js = null;

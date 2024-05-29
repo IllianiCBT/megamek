@@ -48,8 +48,8 @@ import org.apache.logging.log4j.LogManager;
 
 import java.awt.*;
 import java.math.BigInteger;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -3410,6 +3410,7 @@ public abstract class Entity extends TurnOrdered implements Transporter, Targeta
         return internal[loc];
     }
 
+
     /**
      * Returns the original amount of internal structure in the location hit.
      */
@@ -3426,14 +3427,14 @@ public abstract class Entity extends TurnOrdered implements Transporter, Targeta
     }
 
     /**
-     * Sets the amount of armor in the location specified.
+     * Sets the amount of internal structure in the location specified.
      */
     public void setInternal(int val, HitData hit) {
         setInternal(val, hit.getLocation());
     }
 
     /**
-     * Sets the amount of armor in the location specified.
+     * Sets the amount of internal structure in the location specified.
      */
     public void setInternal(int val, int loc) {
         internal[loc] = val;
