@@ -1,5 +1,4 @@
 /*
- * MegaMek - Copyright (c) 2000-2002 Ben Mazur (bmazur@sev.org)
  * Copyright (c) 2024 - The MegaMek Team. All Rights Reserved.
  *
  * This file is part of MegaMek.
@@ -17,31 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with MegaMek. If not, see <http://www.gnu.org/licenses/>.
  */
-package megamek.common.actions;
+package megamek.common.util;
 
-import megamek.common.Game;
+public enum DiscordFormat {
+    GRAY(30), RED(31), GREEN(32), YELLOW(33), BLUE(34), PINK(35), CYAN(36), WHITE(37),
 
-import java.io.Serializable;
+    BOLD(1), UNDERLINE(4),
 
-/**
- * This is a base implementation for {@link EntityAction}.
- */
-public abstract class AbstractEntityAction implements Serializable, EntityAction {
+    RESET(0);
 
-    private static final long serialVersionUID = -758003433608975464L;
-    private final int entityId;
+    private final int code;
 
-    public AbstractEntityAction(int entityId) {
-        this.entityId = entityId;
+    DiscordFormat(int code) {
+        this.code = code;
     }
 
-    @Override
-    public int getEntityId() {
-        return entityId;
-    }
-
-    @Override
-    public String toString() {
-        return "[" + getClass().getSimpleName() + "]: Unit ID " + entityId;
+    public String format() {
+        return "\u001b[" + code + 'm';
     }
 }

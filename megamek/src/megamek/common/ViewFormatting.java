@@ -1,5 +1,4 @@
 /*
- * MegaMek - Copyright (c) 2000-2002 Ben Mazur (bmazur@sev.org)
  * Copyright (c) 2024 - The MegaMek Team. All Rights Reserved.
  *
  * This file is part of MegaMek.
@@ -17,31 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with MegaMek. If not, see <http://www.gnu.org/licenses/>.
  */
-package megamek.common.actions;
 
-import megamek.common.Game;
+package megamek.common;
 
-import java.io.Serializable;
-
-/**
- * This is a base implementation for {@link EntityAction}.
- */
-public abstract class AbstractEntityAction implements Serializable, EntityAction {
-
-    private static final long serialVersionUID = -758003433608975464L;
-    private final int entityId;
-
-    public AbstractEntityAction(int entityId) {
-        this.entityId = entityId;
-    }
-
-    @Override
-    public int getEntityId() {
-        return entityId;
-    }
-
-    @Override
-    public String toString() {
-        return "[" + getClass().getSimpleName() + "]: Unit ID " + entityId;
-    }
+public enum ViewFormatting {
+    HTML, NONE, DISCORD
 }
