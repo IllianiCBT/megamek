@@ -13,12 +13,12 @@
  */
 package megamek.client.ratgenerator;
 
-import java.util.Collection;
-import java.util.HashSet;
-
 import megamek.common.EntityMovementMode;
 import megamek.common.EntityWeightClass;
 import megamek.common.UnitType;
+
+import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * Used to adjust availability to conform to a particular mission role.
@@ -26,6 +26,7 @@ import megamek.common.UnitType;
  * @author Neoancient
  */
 public enum MissionRole {
+    ANY,
     /*General combat roles */
     RECON, RAIDER, INCENDIARY, EW_SUPPORT, ARTILLERY, MISSILE_ARTILLERY, APC, TRAINING, COMMAND,
     /* Non-combat roles */
@@ -50,7 +51,8 @@ public enum MissionRole {
 
     public boolean fitsUnitType(int unitType) {
         switch (this) {
-
+            case ANY:
+                return true;
             // RECON applies to all unit types except gun emplacements, JumpShips,
             // space stations, and some specialized aerospace
             case RECON:
