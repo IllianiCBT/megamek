@@ -13,12 +13,12 @@
  */
 package megamek.client.ratgenerator;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 import megamek.common.EntityMovementMode;
 import megamek.common.EntityWeightClass;
 import megamek.common.UnitType;
-
-import java.util.Collection;
-import java.util.HashSet;
 
 /**
  * Used to adjust availability to conform to a particular mission role.
