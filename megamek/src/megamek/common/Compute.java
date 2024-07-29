@@ -250,9 +250,9 @@ public class Compute {
     }
 
     /**
-     * Wrapper to random#randomInt()
+     * Wrapper to random#randomFloat()
      */
-    public static float randomInt() {
+    public static float randomFloat() {
         return random.randomFloat();
     }
 
