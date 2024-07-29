@@ -15,14 +15,12 @@
 */
 package megamek.common;
 
-import megamek.common.AmmoType.Munitions;
 import megamek.common.MovePath.MoveStepType;
 import megamek.common.actions.*;
 import megamek.common.annotations.Nullable;
-import megamek.common.enums.AimingMode;
-import megamek.common.enums.BasementType;
 import megamek.common.equipment.AmmoMounted;
 import megamek.common.equipment.WeaponMounted;
+import megamek.common.enums.*;
 import megamek.common.options.OptionsConstants;
 import megamek.common.planetaryconditions.Atmosphere;
 import megamek.common.planetaryconditions.IlluminationLevel;
@@ -418,7 +416,7 @@ public class Compute {
                 || (entering instanceof SmallCraft);
         boolean isLargeSupport = (entering instanceof LargeSupportTank)
                 || (entering instanceof Dropship)
-                || ((entering instanceof Mech) && entering
+                || ((entering instanceof Mech) && ((Mech) entering)
                         .isSuperHeavy());
 
         boolean isTrain = !entering.getAllTowedUnits().isEmpty();
@@ -507,7 +505,7 @@ public class Compute {
                         return inHex;
                     }
                     if (((inHex instanceof LargeSupportTank)
-                            || (inHex instanceof Dropship) || ((inHex instanceof Mech) && inHex
+                            || (inHex instanceof Dropship) || ((inHex instanceof Mech) && ((Mech) inHex)
                             .isSuperHeavy())) && !isInfantry) {
                         return inHex;
                     }
@@ -589,7 +587,7 @@ public class Compute {
         }
 
         // airborne aircraft do not require pavement-related checks
-        final boolean isPavementStep = !entity.isAirborne() && Compute.canMoveOnPavement(game, src, dest, moveStep);
+        final boolean isPavementStep = entity.isAirborne() ? false : Compute.canMoveOnPavement(game, src, dest, moveStep);
 
         // check for rubble
         if ((movementType != EntityMovementType.MOVE_JUMP)
@@ -742,7 +740,14 @@ public class Compute {
         }
 
         // check leaps
-        return (entity instanceof Mech) && (delta_alt < -2) && (movementType != EntityMovementType.MOVE_JUMP && (movementType != EntityMovementType.MOVE_VTOL_WALK && (movementType != EntityMovementType.MOVE_VTOL_RUN)));
+        if ((entity instanceof Mech) && (delta_alt < -2)
+            && (movementType != EntityMovementType.MOVE_JUMP
+            && (movementType != EntityMovementType.MOVE_VTOL_WALK
+            && (movementType != EntityMovementType.MOVE_VTOL_RUN)))) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -781,7 +786,10 @@ public class Compute {
 
         // an easy check
         if (!game.getBoard().contains(dest)) {
-            return game.getOptions().booleanOption(OptionsConstants.BASE_PUSH_OFF_BOARD);
+            if (game.getOptions().booleanOption(OptionsConstants.BASE_PUSH_OFF_BOARD)) {
+                return true;
+            }
+            return false;
         }
 
         // can't be displaced into prohibited terrain
@@ -1233,9 +1241,9 @@ public class Compute {
                 || (wtype.getAmmoType() == AmmoType.T_LRM_IMP)
                 || (wtype.getAmmoType() == AmmoType.T_MML)) {
                 AmmoType atype = (AmmoType) weapon.getLinked().getType();
-                if (atype.getMunitionType().contains(Munitions.M_TORPEDO)) {
+                if (atype.getMunitionType().contains(AmmoType.Munitions.M_TORPEDO)) {
                     weaponRanges = wtype.getRanges(weapon);
-                } else if (atype.getMunitionType().contains(Munitions.M_MULTI_PURPOSE)) {
+                } else if (atype.getMunitionType().contains(AmmoType.Munitions.M_MULTI_PURPOSE)) {
                     weaponRanges = wtype.getRanges(weapon);
                     MPM = true;
                 }
@@ -1355,9 +1363,9 @@ public class Compute {
                   || isAttackerBA))
             && !(ae.isAirborne())
             && !(ae.isBomber() && ((IBomber) ae).isVTOLBombing())
-            && !((ae instanceof Dropship) && ae.isSpheroid()
+            && !((ae instanceof Dropship) && ((Dropship) ae).isSpheroid()
                  && !ae.isAirborne() && !ae.isSpaceborne())
-            && !((ae instanceof Mech) && (ae.getGrappled() == target
+            && !((ae instanceof Mech) && (((Mech) ae).getGrappled() == target
                 .getId()))) {
             return new ToHitData(TargetRoll.AUTOMATIC_FAIL,
                                  "Only infantry weapons shoot at zero range");
@@ -1930,7 +1938,7 @@ public class Compute {
             // Friend has to be as close as their max running speed * flight time, + TAG range, + 8
             int taggingRange = ((1 + Compute.turnsTilHit(ownRange)) * friend.getWalkMP()) + range + 8;
             if (debug) {
-                msg.append('\n').append(friend.getDisplayName()).append(" has TAG at ")
+                msg.append("\n").append(friend.getDisplayName()).append(" has TAG at ")
                         .append(friendRange).append(" from target; must be within ")
                         .append(taggingRange).append(" to be able to TAG this target for us.");
             }
@@ -1944,7 +1952,7 @@ public class Compute {
             if ((spotter == null )
                     || range < distance) {
                 if (debug) {
-                    msg.append('\n').append(friend.getDisplayName()).append(" is a good candidate.");
+                    msg.append("\n").append(friend.getDisplayName()).append(" is a good candidate.");
                 }
                 spotter = friend;
                 distance = friendRange;
@@ -1956,7 +1964,7 @@ public class Compute {
         if (debug) {
             msg.append("\nFinal result: ")
                     .append((spotter == null) ? "no TAG friendly in range" : spotter.getDisplayName())
-                    .append('!');
+                    .append("!");
             LogManager.getLogger().debug(msg.toString());
         }
 
@@ -2206,9 +2214,10 @@ public class Compute {
         int torsoLoc = Mech.getInnerLocation(armLoc);
         for (Enumeration<EntityAction> i = game.getActions(); i.hasMoreElements(); ) {
             EntityAction ea = i.nextElement();
-            if (!(ea instanceof WeaponAttackAction prevAttack)) {
+            if (!(ea instanceof WeaponAttackAction)) {
                 continue;
             }
+            WeaponAttackAction prevAttack = (WeaponAttackAction) ea;
             // stop when we get to this weaponattack (does this always work?)
             if ((prevAttack.getEntityId() == attacker.getId())
                 && (prevAttack.getWeaponId() == weaponId)) {
@@ -2388,9 +2397,10 @@ public class Compute {
         Set<Integer> targIds = new HashSet<>();
         for (Enumeration<EntityAction> i = game.getActions(); i.hasMoreElements(); ) {
             Object o = i.nextElement();
-            if (!(o instanceof WeaponAttackAction prevAttack)) {
+            if (!(o instanceof WeaponAttackAction)) {
                 continue;
             }
+            WeaponAttackAction prevAttack = (WeaponAttackAction) o;
             if (prevAttack.getEntityId() == attacker.getId()) {
                 // Don't add id of current target, as it gets counted elsewhere
                 if (prevAttack.getTargetId() != target.getId()) {
@@ -3129,7 +3139,7 @@ public class Compute {
             infDamagePerTrooper = ((Infantry) attacker).getDamagePerTrooper();
         }
 
-        WeaponType wt = weapon.getType();
+        WeaponType wt = (WeaponType) weapon.getType();
 
         float fDamage = 0.0f;
         float fChance = 0.0f;
@@ -3168,7 +3178,7 @@ public class Compute {
             loaded_ammo = (AmmoType) weapon.getLinked().getType();
             if (((loaded_ammo.getAmmoType() == AmmoType.T_AC_LBX) || (loaded_ammo
                                                                               .getAmmoType() == AmmoType.T_AC_LBX_THB))
-                && (loaded_ammo.getMunitionType().contains(Munitions.M_CLUSTER))) {
+                && (loaded_ammo.getMunitionType().contains(AmmoType.Munitions.M_CLUSTER))) {
                 use_table = true;
             }
         }
@@ -3290,11 +3300,11 @@ public class Compute {
                         // -> Hook for Artemis V Level 3 Clan tech here; use
                         // 1.30f multiplier when implemented
                         if (((weapon.curMode() == null) || !weapon.curMode().equals("Indirect"))
-                                && (at.getMunitionType().contains(Munitions.M_ARTEMIS_CAPABLE))) {
+                                && (at.getMunitionType().contains(AmmoType.Munitions.M_ARTEMIS_CAPABLE))) {
                             fHits *= 1.2f;
                         }
                         if (((weapon.curMode() == null) || !weapon.curMode().equals("Indirect"))
-                                && (at.getMunitionType().contains(Munitions.M_ARTEMIS_V_CAPABLE))) {
+                                && (at.getMunitionType().contains(AmmoType.Munitions.M_ARTEMIS_V_CAPABLE))) {
                             fHits *= 1.3f;
                         }
                     }
@@ -3314,7 +3324,7 @@ public class Compute {
                             || (at.getAmmoType() == AmmoType.T_MML)
                             || (at.getAmmoType() == AmmoType.T_SRM)
                             || (at.getAmmoType() == AmmoType.T_SRM_IMP))
-                            && (at.getMunitionType().contains(Munitions.M_NARC_CAPABLE))) {
+                            && (at.getMunitionType().contains(AmmoType.Munitions.M_NARC_CAPABLE))) {
                         fHits *= 1.2f;
                     }
                 }
@@ -3577,7 +3587,7 @@ public class Compute {
                     abin_type = abin.getType();
                     if (!AmmoType.canDeliverMinefield(abin_type)) {
                         fabin = abin;
-                        fabin_type = fabin.getType();
+                        fabin_type = (AmmoType) fabin.getType();
                         break;
                     }
                 }
@@ -3590,7 +3600,7 @@ public class Compute {
         for (AmmoMounted abin : shooter.getAmmo()) {
             if (shooter.loadWeapon((WeaponMounted) shooter.getEquipment(atk.getWeaponId()), abin)) {
                 if (abin.getUsableShotsLeft() > 0) {
-                    abin_type = abin.getType();
+                    abin_type = (AmmoType) abin.getType();
                     if (!AmmoType.canDeliverMinefield(abin_type)) {
                         no_bin = false;
                         if (abin_type.getMunitionType() != fabin_type
@@ -3628,7 +3638,7 @@ public class Compute {
             for (AmmoMounted abin : shooter.getAmmo()) {
                 if (shooter.loadWeapon((WeaponMounted) shooter.getEquipment(atk.getWeaponId()), abin)) {
                     if (abin.getUsableShotsLeft() > 0) {
-                        abin_type = abin.getType();
+                        abin_type = (AmmoType) abin.getType();
                         if (!AmmoType.canDeliverMinefield(abin_type)) {
 
                             // Load weapon with specified bin
@@ -3652,12 +3662,12 @@ public class Compute {
                                     || (abin_type.getAmmoType() == AmmoType.T_MML)
                                     || (abin_type.getAmmoType() == AmmoType.T_SRM)
                                     || (abin_type.getAmmoType() == AmmoType.T_SRM_IMP)))
-                                    && (abin_type.getMunitionType().contains(Munitions.M_FRAGMENTATION)))
+                                    && (abin_type.getMunitionType().contains(AmmoType.Munitions.M_FRAGMENTATION)))
                                     || (((abin_type.getAmmoType() == AmmoType.T_AC)
                                             || (abin_type.getAmmoType() == AmmoType.T_LAC)
                                             || (abin_type.getAmmoType() == AmmoType.T_AC_IMP)
                                             || (abin_type.getAmmoType() == AmmoType.T_PAC))
-                                            && (abin_type.getMunitionType().contains(Munitions.M_FLECHETTE)))) {
+                                            && (abin_type.getMunitionType().contains(AmmoType.Munitions.M_FLECHETTE)))) {
                                 ammo_multiple = target.isConventionalInfantry() ? 2.0 : 0.0;
                             }
 
@@ -3669,7 +3679,7 @@ public class Compute {
                             if (((abin_type.getAmmoType() == AmmoType.T_AC_LBX)
                                     || (abin_type.getAmmoType() == AmmoType.T_AC_LBX_THB)
                                     || (abin_type.getAmmoType() == AmmoType.T_SBGAUSS))
-                                    && (abin_type.getMunitionType().contains(Munitions.M_CLUSTER))) {
+                                    && (abin_type.getMunitionType().contains(AmmoType.Munitions.M_CLUSTER))) {
                                 if (target.getArmorRemainingPercent() <= 0.25) {
                                     ammo_multiple = 1.0 + (wtype.getRackSize() / 10.0);
                                 }
@@ -3688,7 +3698,7 @@ public class Compute {
                                     || (abin_type.getAmmoType() == AmmoType.T_LAC)
                                     || (abin_type.getAmmoType() == AmmoType.T_AC_IMP)
                                     || (abin_type.getAmmoType() == AmmoType.T_PAC))
-                                && (abin_type.getMunitionType().contains(Munitions.M_ARMOR_PIERCING))) {
+                                && (abin_type.getMunitionType().contains(AmmoType.Munitions.M_ARMOR_PIERCING))) {
                                 if ((target instanceof Mech)
                                     || (target instanceof Tank)) {
                                     ammo_multiple = 1.0 + (wtype.getRackSize() / 10);
@@ -3705,7 +3715,7 @@ public class Compute {
                             if (((abin_type.getAmmoType() == AmmoType.T_SRM)
                                     || (abin_type.getAmmoType() == AmmoType.T_SRM_IMP)
                                     || (abin_type.getAmmoType() == AmmoType.T_MML))
-                                && (abin_type.getMunitionType().contains(Munitions.M_INFERNO))) {
+                                && (abin_type.getMunitionType().contains(AmmoType.Munitions.M_INFERNO))) {
                                 ammo_multiple = 0.5;
                                 if (target instanceof Mech) {
                                     if ((target.infernos.getTurnsLeftToBurn() < 4)
@@ -3730,7 +3740,7 @@ public class Compute {
                             // one, give 'em one by making it an attractive
                             // option
                             if ((wtype.getAmmoType() == AmmoType.T_NARC)
-                                    && (abin_type.getMunitionType().contains(Munitions.M_STANDARD))) {
+                                    && (abin_type.getMunitionType().contains(AmmoType.Munitions.M_STANDARD))) {
                                 if (!(target.isNarcedBy(shooter.getOwner().getTeam()))
                                         && !(target instanceof Infantry)) {
                                     ex_damage = 5.0;
@@ -3744,7 +3754,7 @@ public class Compute {
                             // one, give 'em one by making it an attractive
                             // option
                             if (wtype.getAmmoType() == AmmoType.T_INARC) {
-                                if ((abin_type.getMunitionType().contains(Munitions.M_STANDARD))
+                                if ((abin_type.getMunitionType().contains(AmmoType.Munitions.M_STANDARD))
                                         && !(target instanceof Infantry)) {
                                     if (!(target.isINarcedBy(shooter.getOwner().getTeam()))) {
                                         ex_damage = 7.0;
@@ -3762,7 +3772,7 @@ public class Compute {
                                 // loads
                                 // when "true" double blind is implemented
                                 if ((abin_type.getAmmoType() == AmmoType.T_INARC)
-                                        && (abin_type.getMunitionType().contains(Munitions.M_ECM))
+                                        && (abin_type.getMunitionType().contains(AmmoType.Munitions.M_ECM))
                                         && !(target instanceof Infantry)) {
                                     if (!target.isINarcedWith(INarcPod.ECM)) {
                                         if (!(target.getC3MasterId() == Entity.NONE)
@@ -3793,7 +3803,7 @@ public class Compute {
                                 // priority because they are usually out
                                 // front
                                 if ((abin_type.getAmmoType() == AmmoType.T_INARC)
-                                        && (abin_type.getMunitionType().contains(Munitions.M_NEMESIS))
+                                        && (abin_type.getMunitionType().contains(AmmoType.Munitions.M_NEMESIS))
                                         && !(target instanceof Infantry)) {
                                     if (!target.isINarcedWith(INarcPod.NEMESIS)) {
                                         ex_damage = (double) (target.getWalkMP() + target.getJumpMP()) / 2;
@@ -3916,7 +3926,7 @@ public class Compute {
             Targetable t) {
         Entity ae = game.getEntity(attackerId);
         if ((ae instanceof Mech)
-            && (ae.getGrappled() == t.getId())) {
+            && (((Mech) ae).getGrappled() == t.getId())) {
             return true;
         }
         int facing = ae.isSecondaryArcWeapon(weaponId) ? ae
@@ -3965,9 +3975,10 @@ public class Compute {
 
         // AMS defending against Ground to Air fire needs to calculate arc based on the closest flight path
         // Technically it's an AirToGround attack since the AMS is on the aircraft
-        if (isAirToGround(ae, t) && (t instanceof Entity te)
+        if (isAirToGround(ae, t) && (t instanceof Entity)
                 && (ae.getEquipment(weaponId).getType().hasFlag(WeaponType.F_AMS)
                         || ae.getEquipment(weaponId).getType().hasFlag(WeaponType.F_AMSBAY))) {
+            Entity te = (Entity) t;
             aPos = getClosestFlightPath(te.getId(), te.getPosition(),
                     ae);
         }
@@ -3975,9 +3986,9 @@ public class Compute {
         tPosV.add(tPos);
         // check for secondary positions
         if ((t instanceof Entity)
-            && (null != t.getSecondaryPositions())) {
-            for (int key : t.getSecondaryPositions().keySet()) {
-                tPosV.add(t.getSecondaryPositions().get(key));
+            && (null != ((Entity) t).getSecondaryPositions())) {
+            for (int key : ((Entity) t).getSecondaryPositions().keySet()) {
+                tPosV.add(((Entity) t).getSecondaryPositions().get(key));
             }
         }
         return Compute.isInArc(aPos, facing, tPosV, ae.getWeaponArc(weaponId));
@@ -4013,7 +4024,7 @@ public class Compute {
         tPosV.add(target.getPosition());
         // check for secondary positions
         if (target instanceof Entity) {
-            Map<Integer, Coords> secondaryPositions = target.getSecondaryPositions();
+            Map<Integer, Coords> secondaryPositions = ((Entity) target).getSecondaryPositions();
             if (null != secondaryPositions && !secondaryPositions.isEmpty()) {
                 // Some units fill additional hexes
                 for (Coords hex : secondaryPositions.values()) {
@@ -4022,7 +4033,7 @@ public class Compute {
                         tPosV.add(hex);
                     } else {
                         LogManager.getLogger().warn(
-                                "Entity " + target.getDisplayName() + " has null secondary location!"
+                                "Entity " + ((Entity) target).getDisplayName() + " has null secondary location!"
                         );
                     }
                 }
@@ -4383,7 +4394,11 @@ public class Compute {
                 if (ae.getAltitude() > 8) {
                     return false;
                 }
-                return ae.passedOver(target);
+                if (ae.passedOver(target)) {
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }
 
@@ -4487,13 +4502,13 @@ public class Compute {
         }
         Entity te = (Entity) target;
         for (Entity en : Compute.getAdjacentEntitiesAlongAttack(ae.getPosition(), target.getPosition(), game)) {
-            if (!en.isEnemyOf(te) && en.isLargeCraft() && !en.equals(te) && ((en.getWeight() - te.getWeight()) >= -100000.0)) {
+            if (!en.isEnemyOf(te) && en.isLargeCraft() && !en.equals((Entity) te) && ((en.getWeight() - te.getWeight()) >= -100000.0)) {
                 mod ++;
                 break;
             }
         }
         for (Entity en : game.getEntitiesVector(target.getPosition())) {
-            if (!en.isEnemyOf(te) && en.isLargeCraft() && !en.equals(ae) && !en.equals(te)
+            if (!en.isEnemyOf(te) && en.isLargeCraft() && !en.equals((Entity) ae) && !en.equals((Entity) te)
                     && ((en.getWeight() - te.getWeight()) >= -100000.0)) {
                 mod ++;
                 break;
@@ -4648,7 +4663,8 @@ public class Compute {
             return false;
         }
 
-        if (ae instanceof Aero aero) {
+        if (ae instanceof Aero) {
+            Aero aero = (Aero) ae;
             //Account for sensor damage
             if (aero.isAeroSensorDestroyed()) {
                 return false;
@@ -4736,7 +4752,8 @@ public class Compute {
             rangeIncrement = Sensor.ASF_RADAR_AUTOSPOT_RANGE;
         }
 
-        if (ae instanceof Aero aero) {
+        if (ae instanceof Aero) {
+            Aero aero = (Aero) ae;
             //Account for sensor damage
             if (aero.isAeroSensorDestroyed()) {
                 return false;
@@ -4765,7 +4782,12 @@ public class Compute {
         //Military ESM automatically detects anyone using active sensors, which includes all telemissiles
         if (ae.getActiveSensor().getType() == Sensor.TYPE_SPACECRAFT_ESM && target.getTargetType() == Targetable.TYPE_ENTITY) {
             Entity te = (Entity) target;
-            return te.getActiveSensor().getType() == Sensor.TYPE_AERO_SENSOR || te.getActiveSensor().getType() == Sensor.TYPE_SPACECRAFT_RADAR || te instanceof TeleMissile;
+            if (te.getActiveSensor().getType() == Sensor.TYPE_AERO_SENSOR
+                    || te.getActiveSensor().getType() == Sensor.TYPE_SPACECRAFT_RADAR
+                    || te instanceof TeleMissile) {
+                return true;
+            }
+            return false;
         }
 
         //Can't detect anything beyond this distance
@@ -4892,10 +4914,11 @@ public class Compute {
 
         //Aeros have to check visibility to ground targets for the closest point of approach along their flight path
         //Because the rules state "within X hexes of the flight path" we're using ground distance so altitude doesn't screw us up
-        if (isAirToGround(ae, target) && (target instanceof Entity te)) {
+        if (isAirToGround(ae, target) && (target instanceof Entity)) {
+            Entity te = (Entity) target;
             distance = te.getPosition().distance(
                     getClosestFlightPath(te.getId(),
-                            te.getPosition(), ae));
+                            te.getPosition(), (Entity) ae));
             return (distance > minSensorRange) && (distance <= maxSensorRange);
         }
         //This didn't work right for Aeros. Should account for the difference in altitude, not just add the target's altitude to distance
@@ -5597,9 +5620,12 @@ public class Compute {
         IAero a = (IAero) attacker;
 
         // the fighters nose must be aligned with its direction of travel
-        boolean rightFacing = !game.useVectorMove();
+        boolean rightFacing = false;
         // using normal movement, I think this means that the last move can't be
         // a turn
+        if (!game.useVectorMove()) {
+            rightFacing = true;
+        }
         // for advanced movement, it must be aligned with largest vector
         if (game.useVectorMove()) {
             for (int h : attacker.getHeading()) {
@@ -5616,7 +5642,6 @@ public class Compute {
             for (Entity target : game.getEntitiesVector(c)) {
                 if (target.getId() == defender.getId()) {
                     canTarget = true;
-                    break;
                 }
             }
             if (canTarget) {
@@ -5785,7 +5810,8 @@ public class Compute {
         boolean alreadyPerformingOther = false;
         for (Enumeration<EntityAction> actions = game.getActions(); actions.hasMoreElements(); ) {
             EntityAction ea = actions.nextElement();
-            if (ea instanceof WeaponAttackAction waa) {
+            if (ea instanceof WeaponAttackAction) {
+                WeaponAttackAction waa = (WeaponAttackAction) ea;
                 Entity waaAE = waa.getEntity(game);
                 if ((waaAE != null) && waaAE.equals(attacker)) {
                     // impossible if already doing a swarm attack
@@ -5813,7 +5839,8 @@ public class Compute {
         }
 
         // Handle BattleArmor attackers.
-        else if (attacker instanceof BattleArmor inf) {
+        else if (attacker instanceof BattleArmor) {
+            BattleArmor inf = (BattleArmor) attacker;
             toReturn = new ToHitData(inf.getCrew().getPiloting(),
                     "anti-mech skill", ToHitData.HIT_KICK, ToHitData.SIDE_FRONT);
             int men = inf.getShootingStrength();
@@ -5828,8 +5855,9 @@ public class Compute {
                 modifier = 7;
             }
             toReturn.addModifier(modifier, men + " trooper(s) active");
-        } else if (attacker instanceof Infantry inf) {
+        } else if (attacker instanceof Infantry) {
             // Non-BattleArmor infantry need many more men.
+            Infantry inf = (Infantry) attacker;
             toReturn = new ToHitData(inf.getCrew().getPiloting(),
                     "anti-mech skill", ToHitData.HIT_KICK, ToHitData.SIDE_FRONT);
             int men = inf.getShootingStrength();
@@ -5852,7 +5880,7 @@ public class Compute {
 
         // If the swarm is impossible, ToHitData wasn't created
         if (toReturn == null) {
-            toReturn = new ToHitData(TargetRoll.IMPOSSIBLE, reason,
+            toReturn = new ToHitData(TargetRoll.IMPOSSIBLE, reason.toString(),
                     ToHitData.HIT_KICK, ToHitData.SIDE_FRONT);
         }
         if (toReturn.getValue() == TargetRoll.IMPOSSIBLE) {
@@ -5879,7 +5907,8 @@ public class Compute {
         boolean alreadyPerformingOther = false;
         for (Enumeration<EntityAction> actions = game.getActions(); actions.hasMoreElements(); ) {
             EntityAction ea = actions.nextElement();
-            if (ea instanceof WeaponAttackAction waa) {
+            if (ea instanceof WeaponAttackAction) {
+                WeaponAttackAction waa = (WeaponAttackAction) ea;
                 Entity waaAE = waa.getEntity(game);
                 if ((waaAE != null) && waaAE.equals(attacker)) {
                     // impossible if already doing a swarm attack
@@ -5912,7 +5941,8 @@ public class Compute {
             reason = "Only one swarm allowed at a time.";
         }
         // Handle BattleArmor attackers.
-        else if (attacker instanceof BattleArmor inf) {
+        else if (attacker instanceof BattleArmor) {
+            BattleArmor inf = (BattleArmor) attacker;
             toReturn = new ToHitData(inf.getCrew().getPiloting(), "anti-mech skill");
             int men = inf.getShootingStrength();
             int modifier = TargetRoll.IMPOSSIBLE;
@@ -5924,7 +5954,8 @@ public class Compute {
             toReturn.addModifier(modifier, men + " trooper(s) active");
         }
         // Non-BattleArmor infantry need many more men.
-        else if (attacker instanceof Infantry inf) {
+        else if (attacker instanceof Infantry) {
+            Infantry inf = (Infantry) attacker;
             toReturn = new ToHitData(inf.getCrew().getPiloting(), "anti-mech skill");
             int men = inf.getShootingStrength();
             int modifier = TargetRoll.IMPOSSIBLE;
@@ -5937,7 +5968,7 @@ public class Compute {
         }
         // If the swarm is impossible, ToHitData wasn't created
         if (toReturn == null) {
-            toReturn = new ToHitData(TargetRoll.IMPOSSIBLE, reason);
+            toReturn = new ToHitData(TargetRoll.IMPOSSIBLE, reason.toString());
         }
         if (toReturn.getValue() == TargetRoll.IMPOSSIBLE) {
             return toReturn;
@@ -6050,7 +6081,11 @@ public class Compute {
             return true;
         }
 
-        return BAVibroClawAttackAction.toHit(game, entityId, target).getValue() != TargetRoll.IMPOSSIBLE;
+        if (BAVibroClawAttackAction.toHit(game, entityId, target).getValue() != TargetRoll.IMPOSSIBLE) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -6119,9 +6154,10 @@ public class Compute {
      */
     public static boolean isInSameBuilding(Game game, Entity attacker,
             Targetable target) {
-        if (!(target instanceof Entity targetEntity)) {
+        if (!(target instanceof Entity)) {
             return false;
         }
+        Entity targetEntity = (Entity) target;
         if (!Compute.isInBuilding(game, attacker)
                 || !Compute.isInBuilding(game, targetEntity)) {
             return false;
@@ -6220,9 +6256,12 @@ public class Compute {
         }
 
         // Return true if the entity is in the range of building elevations.
-        return (entityElev >= (-basement)) && (entityElev < (bldgHeight));
+        if ((entityElev >= (-basement)) && (entityElev < (bldgHeight))) {
+            return true;
+        }
 
         // Entity is not *inside* of the building.
+        return false;
     }
 
     /**
@@ -6958,7 +6997,9 @@ public class Compute {
                 tAlt++;
             }
             int altDiff = Math.abs(aAlt - tAlt);
-            return altDiff >= (distance - altDiff);
+            if (altDiff >= (distance - altDiff)) {
+                return true;
+            }
         }
         return false;
     }
@@ -7029,7 +7070,7 @@ public class Compute {
         boolean isWeaponInfantry = wtype.hasFlag(WeaponType.F_INFANTRY);
         boolean usesAmmo = (wtype.getAmmoType() != AmmoType.T_NA) && !isWeaponInfantry;
         AmmoMounted ammo = usesAmmo ? weapon.getLinkedAmmo() : null;
-        AmmoType atype = ammo == null ? null : ammo.getType();
+        AmmoType atype = ammo == null ? null : (AmmoType) ammo.getType();
 
         // Leg, swarm, and BA LB-X AC attacks can't be aimed.
         if (wtype.getInternalName().equals(Infantry.LEG_ATTACK)
@@ -7085,14 +7126,14 @@ public class Compute {
                 if (((atype.getAmmoType() == AmmoType.T_AC_LBX_THB)
                      || (atype.getAmmoType() == AmmoType.T_AC_LBX)
                      || (atype.getAmmoType() == AmmoType.T_SBGAUSS))
-                    && (atype.getMunitionType().contains(Munitions.M_CLUSTER))) {
+                    && (atype.getMunitionType().contains(AmmoType.Munitions.M_CLUSTER))) {
                     return false;
                 }
                 // Flak Ammo can't make aimed shots
                 if (((atype.getAmmoType() == AmmoType.T_AC)
                      || (atype.getAmmoType() == AmmoType.T_AC_ULTRA)
                      || (atype.getAmmoType() == AmmoType.T_AC_ULTRA_THB))
-                    && (atype.getMunitionType().contains(Munitions.M_FLAK))) {
+                    && (atype.getMunitionType().contains(AmmoType.Munitions.M_FLAK))) {
                     return false;
                 }
 
@@ -7111,7 +7152,7 @@ public class Compute {
                     && ((atype.getAmmoType() == AmmoType.T_AC_LBX_THB)
                         || (atype.getAmmoType() == AmmoType.T_AC_LBX)
                         || (atype.getAmmoType() == AmmoType.T_SBGAUSS))
-                    && (atype.getMunitionType().contains(Munitions.M_CLUSTER))) {
+                    && (atype.getMunitionType().contains(AmmoType.Munitions.M_CLUSTER))) {
                     return false;
                 }
 
@@ -7120,7 +7161,7 @@ public class Compute {
                     && ((atype.getAmmoType() == AmmoType.T_AC)
                         || (atype.getAmmoType() == AmmoType.T_AC_ULTRA)
                         || (atype.getAmmoType() == AmmoType.T_AC_ULTRA_THB))
-                    && (atype.getMunitionType().contains(Munitions.M_FLAK))) {
+                    && (atype.getMunitionType().contains(AmmoType.Munitions.M_FLAK))) {
                     return false;
                 }
                 break;
@@ -7172,7 +7213,7 @@ public class Compute {
             return 0;
         }
         if (entity instanceof Dropship) {
-            if (entity.isMilitary()) {
+            if (((Dropship) entity).isMilitary()) {
                 return 4 + (int) Math.ceil(entity.getWeight() / 5000.0);
             } else {
                 return 3 + (int) Math.ceil(entity.getWeight() / 5000.0);
@@ -7487,7 +7528,8 @@ public class Compute {
         int turnsTilHit = turnsTilHit(effectiveDistance(game, ae, target, true));
 
         // Hexes can't move...
-        if (target instanceof Entity te) {
+        if (target instanceof Entity) {
+            Entity te = (Entity) target;
             int mp = te.getPriorPosition().distance(te.getPosition()); // Assume last move presages the next
             if (mp == 0 && game.getRoundCount() == 0) {
                 // Assume a mobile enemy will move somewhat after deploying
@@ -7523,9 +7565,13 @@ public class Compute {
     public static Coords calculateArtilleryLead(Coords targetPoint, int direction, int leadAmount) {
         Coords newPoint = targetPoint.translated(direction, leadAmount);
         if (LogManager.getLogger().isDebugEnabled()) {
-            String msg = "Computed coordinates ( " + newPoint.toString() + " ) for target point ( " + targetPoint + " ), direction " + direction + ", lead range " + leadAmount;
+            StringBuilder msg = new StringBuilder("Computed coordinates ( ")
+                    .append(newPoint.toString())
+                    .append(" ) for target point ( ").append(targetPoint.toString())
+                    .append(" ), direction ").append(direction)
+                    .append(", lead range ").append(leadAmount);
 
-            LogManager.getLogger().debug(msg);
+            LogManager.getLogger().debug(msg.toString());
         }
         return newPoint;
     }
