@@ -229,15 +229,32 @@ public abstract class AbstractIcon implements Serializable {
                 // when the below handlers are removed
                 String category = MMXMLUtility.unEscape(workingNode.getTextContent().trim());
                 category = category.replaceAll("Aero ", "Aerospace ");
+                category = category.replaceAll("AeroTech", "AeroTek");
                 category = category.replaceAll("Mech ", "Mek ");
+                category = category.replaceAll("MechTech ", "MechTek");
                 category = category.replaceAll("MechWarrior", "MekWarrior");
                 category = category.replaceAll("ProtoMech", "ProtoMek");
+                category = category.replaceAll("Protomech", "ProtoMek");
 
                 setCategory(category);
                 //end <50.01 compatibility handlers
                 break;
             case "filename":
-                setFilename(MMXMLUtility.unEscape(workingNode.getTextContent().trim()));
+                // setFilename(MMXMLUtility.unEscape(workingNode.getTextContent().trim()));
+
+                //start <50.01 compatibility handlers, the above-commented code can be uncommented
+                // when the below handlers are removed
+                String filename = MMXMLUtility.unEscape(workingNode.getTextContent().trim());
+                filename = filename.replaceAll("Aero ", "Aerospace ");
+                filename = filename.replaceAll("AeroTech", "AeroTek");
+                filename = filename.replaceAll("Mech ", "Mek ");
+                filename = filename.replaceAll("MechTech", "MekTek");
+                filename = filename.replaceAll("MechWarrior", "MekWarrior");
+                filename = filename.replaceAll("ProtoMech", "ProtoMek");
+                filename = filename.replaceAll("Protomech", "ProtoMek");
+
+                setFilename(filename);
+                //end <50.01 compatibility handlers
                 break;
             default:
                 break;
