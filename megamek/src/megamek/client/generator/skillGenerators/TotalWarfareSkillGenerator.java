@@ -50,8 +50,43 @@ public class TotalWarfareSkillGenerator extends AbstractSkillGenerator {
         return generateRandomSkills(getLevel(), entity, clanPilot, forceClan);
     }
 
+    /**
+     * Generates random pilot skills (gunnery and piloting levels) for an entity based on the provided skill level,
+     * pilot type, and clan affiliation.
+     * The skill levels are determined by rolling dice, applying bonuses, and then adjusting the results based on
+     * the specified skill level. The final skills are bounded by the predefined skill arrays.
+     *
+     * @param level      the {@link SkillLevel} representing the desired skill level of the pilot (e.g., ULTRA_GREEN,
+     *                   VETERAN, LEGENDARY). This influences the gunnery and piloting levels.
+     * @param entity     the {@link Entity} for which the skills are being generated. This entity may influence bonuses.
+     * @param clanPilot  a boolean flag indicating whether the pilot is affiliated with a clan:
+     *                   <ul>
+     *                     <li>{@code true}: Treats the pilot as a clan member, granting potential bonuses.</li>
+     *                     <li>{@code false}: Treats the pilot as non-clan.</li>
+     *                   </ul>
+     * @param forceClan  a boolean flag that forces the pilot to be considered as a clan pilot for skill calculation
+     *                   regardless of other factors. This may override default behavior.
+     * @return an array of integers, where:
+     *         <ul>
+     *           <li>Index {@code 0}: The calculated gunnery skill level.</li>
+     *           <li>Index {@code 1}: The calculated piloting skill level.</li>
+     *         </ul>
+     *
+     * <p>Behavior and Process:</p>
+     * <ol>
+     *   <li>Calculates a skill bonus using the {@link #determineBonus(Entity, boolean, boolean)} method based on
+     *       the entity's properties and pilot types.</li>
+     *   <li>Determines random base rolls for gunnery and piloting using {@code Compute.d6(1)}.</li>
+     *   <li>Adjusts the rolls based on the calculated bonus.</li>
+     *   <li>Uses the provided {@link SkillLevel} to further adjust the gunnery and piloting levels (e.g., adding
+     *       fixed offsets for VETERAN, HEROIC, etc.).</li>
+     *   <li>Ensures the resulting gunnery and piloting values stay within the predefined {@code SKILL_LEVELS} array
+     *       bounds using the {@link Math#min(int, int)} method.</li>
+     *   <li>Returns the cleaned and bounded results as an integer array using the {@link #cleanReturn(Entity, int, int)} method.</li>
+     * </ol>
+     */
     protected int[] generateRandomSkills(final SkillLevel level, final Entity entity, final boolean clanPilot,
-            final boolean forceClan) {
+                                         final boolean forceClan) {
         final int bonus = determineBonus(entity, clanPilot, forceClan);
 
         final int gunneryRoll = Compute.d6(1) + bonus;
@@ -95,8 +130,12 @@ public class TotalWarfareSkillGenerator extends AbstractSkillGenerator {
                 break;
         }
 
-        return cleanReturn(entity, SKILL_LEVELS[0][Math.min(gunneryLevel, SKILL_LEVELS[0].length)],
-                SKILL_LEVELS[1][Math.min(pilotingLevel, SKILL_LEVELS[1].length)]);
+        // Apply bounds for array access
+        return cleanReturn(
+            entity,
+            SKILL_LEVELS[0][Math.min(gunneryLevel, SKILL_LEVELS[0].length - 1)],
+            SKILL_LEVELS[1][Math.min(pilotingLevel, SKILL_LEVELS[1].length - 1)]
+        );
     }
 
     /**
